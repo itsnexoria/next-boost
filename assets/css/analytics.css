@@ -1,0 +1,141 @@
+/* ============================================================
+   ANALYTICS PAGE CSS
+   ============================================================ */
+
+/* ---- SUMMARY ---- */
+.an-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+/* ---- TASK CARDS ---- */
+.an-tasks { display: flex; flex-direction: column; gap: 20px; }
+
+.an-task-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  transition: border-color 0.18s;
+}
+.an-task-card:hover { border-color: var(--border2); }
+
+.an-task-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.an-task-url {
+  font-size: 0.88rem;
+  font-weight: 600;
+  word-break: break-all;
+  margin-bottom: 2px;
+}
+
+/* ---- PROGRESS ---- */
+.an-progress-wrap {
+  height: 8px;
+  background: var(--surface3);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.an-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--orange), var(--amber));
+  border-radius: 6px;
+  transition: width 0.6s ease;
+  min-width: 2px;
+}
+
+/* ---- STAT GRID ---- */
+.an-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  background: var(--surface2);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  border: 1px solid var(--border);
+}
+.an-stat { text-align: center; }
+.an-stat-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--orange);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.an-stat-lbl {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---- COMMENTS ---- */
+.comment-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  align-items: flex-start;
+}
+.comment-item:last-child { border-bottom: none; }
+.comment-note { background: rgba(232,98,26,0.05); border-radius: var(--radius-sm); padding: 10px; margin: 0 -4px; }
+.comment-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700; color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  flex-shrink: 0;
+}
+.comment-body { flex: 1; min-width: 0; }
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.comment-meta strong { color: var(--text); }
+.comment-text { font-size: 0.87rem; line-height: 1.55; word-break: break-word; }
+.note-badge {
+  background: rgba(232,98,26,0.15);
+  color: var(--orange);
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* ---- COMMENTS IN EARN FEED ---- */
+.task-comments-section {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.task-comment-mini {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 6px 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.task-comment-mini strong { color: var(--text); margin-right: 4px; }
+
+@media(max-width:500px) {
+  .an-stats { grid-template-columns: repeat(3, 1fr); }
+  .an-task-header { flex-direction: column; }
+}

@@ -1,0 +1,157 @@
+/* ============================================================
+   STORE PAGE CSS
+   ============================================================ */
+
+/* ---- HOW IT WORKS ---- */
+.store-how {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+}
+.how-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 140px;
+}
+.how-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--orange), var(--orange-dk));
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.how-step strong { font-size: 0.88rem; display: block; margin-bottom: 2px; }
+.how-step p { font-size: 0.78rem; color: var(--muted); margin: 0; }
+.how-arrow { color: var(--muted2); font-size: 1.2rem; flex-shrink: 0; }
+@media(max-width:640px) { .how-arrow { display: none; } }
+
+/* ---- PACKAGES ---- */
+.packages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 8px;
+}
+.package-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  cursor: pointer;
+  transition: border-color 0.18s, transform 0.18s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.package-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.package-card.selected { border-color: var(--orange); background: rgba(232,98,26,0.05); }
+.package-card.popular { border-color: var(--orange); }
+.pkg-popular-badge {
+  position: absolute;
+  top: -12px; left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, var(--orange), var(--orange-dk));
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: 3px 12px;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+.pkg-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.pkg-pts {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--orange);
+  line-height: 1;
+}
+.pkg-pts span { font-size: 1rem; color: var(--muted); }
+.pkg-price {
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-family: 'Space Grotesk', sans-serif;
+}
+.pkg-rate { font-size: 0.75rem; color: var(--muted); }
+.pkg-features {
+  list-style: none;
+  padding: 0; margin: 4px 0 0;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.pkg-features li { font-size: 0.82rem; color: var(--muted); }
+.pkg-btn { margin-top: auto; }
+
+/* ---- CHECKOUT ---- */
+.checkout-step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.cs-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 0.85rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.cs-body strong { font-size: 0.9rem; display: block; margin-bottom: 6px; }
+.cs-body p { font-size: 0.83rem; color: var(--muted); line-height: 1.5; }
+
+/* ---- PAYPAL BUTTON ---- */
+.btn-paypal {
+  background: #0070ba;
+  color: #fff !important;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: background 0.18s, transform 0.18s;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-paypal:hover { background: #005ea6; transform: translateY(-1px); color: #fff !important; }
+
+/* ---- PURCHASE HISTORY ---- */
+.purchase-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.purchase-row:last-child { border-bottom: none; }
+.purchase-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.chip-pending { background: rgba(240,160,48,0.15); color: var(--amber); }
+.chip-rejected { background: rgba(232,74,74,0.15); color: var(--red); }

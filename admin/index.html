@@ -33,6 +33,7 @@
           <button class="sidebar-btn" onclick="adminTab('tasks')">📋 Tasks</button>
           <button class="sidebar-btn" onclick="adminTab('reports')">🚩 Reports <span class="reports-count" id="reports-count" style="display:none">0</span></button>
           <button class="sidebar-btn" onclick="adminTab('suspicious')">🤖 Suspicious</button>
+          <button class="sidebar-btn" onclick="adminTab('purchases')">💳 Purchases <span class="reports-count" id="purchase-count" style="display:none">0</span></button>
         </nav>
       </aside>
 
@@ -97,6 +98,12 @@
           </div>
         </div>
 
+        <!-- PURCHASES -->
+        <div id="panel-purchases" class="admin-panel">
+          <h1 class="admin-title">Point Purchases</h1>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px">Review PayPal purchase requests. Verify payment in your PayPal account before approving.</p>
+          <div id="purchases-wrap"><div class="spinner"></div></div>
+        </div>
       </main>
     </div>
   </div>
@@ -158,6 +165,7 @@
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     loadOverview();
+    loadPurchaseCount();
 
     // ---- TABS ----
     window.adminTab = (tab) => {
@@ -170,6 +178,7 @@
       if (tab === 'tasks') { tasksOffset = 0; loadTasks(true); }
       if (tab === 'reports') { reportsOffset = 0; loadReports(true); }
       if (tab === 'suspicious') loadSuspicious();
+      if (tab === 'purchases') loadPurchases();
     };
 
     // ---- OVERVIEW ----
@@ -185,12 +194,14 @@
         { icon:'📋', label:'Active tasks',       val: s.active_tasks,      color:'var(--green)' },
         { icon:'✅', label:'Total completions',  val: s.total_completions, color:'var(--amber)' },
         { icon:'🚩', label:'Open reports',       val: s.open_reports,      color: s.open_reports > 0 ? 'var(--red)' : 'var(--muted)' },
+        { icon:'💳', label:'Pending purchases',   val: s.pending_purchases,  color: s.pending_purchases > 0 ? 'var(--amber)' : 'var(--muted)' },
+        { icon:'💵', label:'Total revenue',        val: '$'+parseFloat(s.total_revenue_usd||0).toFixed(2), color:'var(--green)' },
         { icon:'⚡', label:'Points in system',   val: s.points_in_system,  color:'var(--orange)' },
       ];
       grid.innerHTML = cards.map(c => `
         <div class="stat-card">
           <div class="stat-card-icon">${c.icon}</div>
-          <div class="stat-card-val" style="color:${c.color}">${Number(c.val).toLocaleString()}</div>
+          <div class="stat-card-val" style="color:${c.color}">${isNaN(Number(c.val)) ? c.val : Number(c.val).toLocaleString()}</div>
           <div class="stat-card-lbl">${c.label}</div>
         </div>`).join('');
 
@@ -475,6 +486,79 @@
         rows.appendChild(row);
       });
     }
+
+    // ---- PURCHASES ----
+    async function loadPurchaseCount() {
+      const { data } = await supabase.rpc('admin_get_purchases', { p_limit: 100, p_offset: 0 });
+      const pending = (data || []).filter(p => p.status === 'pending').length;
+      const badge = document.getElementById('purchase-count');
+      if (badge) { badge.textContent = pending; badge.style.display = pending > 0 ? 'inline-flex' : 'none'; }
+    }
+
+    async function loadPurchases() {
+      const wrap = document.getElementById('purchases-wrap');
+      wrap.innerHTML = '<div class="spinner"></div>';
+      const { data, error } = await supabase.rpc('admin_get_purchases', { p_limit: 50, p_offset: 0 });
+      if (error || !data || !data.length) {
+        wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">💳</div><p>No purchase requests yet.</p></div>';
+        return;
+      }
+      wrap.innerHTML = `
+        <div class="admin-table">
+          <div class="admin-table-head" style="grid-template-columns:1.5fr 1fr 0.8fr 1fr 0.8fr 1fr 1.5fr">
+            <span>User</span><span>Package</span><span>Amount</span><span>PayPal Ref</span><span>Past Purchases</span><span>Status</span><span>Actions</span>
+          </div>
+          <div id="purchases-rows"></div>
+        </div>`;
+      const rows = document.getElementById('purchases-rows');
+      data.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'admin-table-row';
+        row.id = 'purchase-row-' + p.id;
+        row.style.gridTemplateColumns = '1.5fr 1fr 0.8fr 1fr 0.8fr 1fr 1.5fr';
+        const statusColors = { pending: 'var(--amber)', approved: 'var(--green)', rejected: 'var(--red)' };
+        row.innerHTML = `
+          <span>
+            <div class="user-name">${esc(p.username)} ${p.is_flagged ? '⚑' : ''}</div>
+            <div class="user-meta">Rep: ${p.reputation}</div>
+          </span>
+          <span style="text-transform:capitalize">${p.package_id}</span>
+          <span style="font-weight:700;color:var(--green)">$${parseFloat(p.usd_amount).toFixed(2)}</span>
+          <span style="font-size:0.8rem;word-break:break-all">${esc(p.paypal_ref)}</span>
+          <span>${p.total_past_purchases} approved</span>
+          <span style="color:${statusColors[p.status]};font-weight:700;text-transform:capitalize">${p.status}</span>
+          <span class="action-btns">
+            ${p.status === 'pending' ? `
+              <button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green)" onclick="window.approvePurchase('${p.id}',${p.points})">✓ Approve (+${p.points}pts)</button>
+              <button class="btn btn-danger btn-sm" onclick="window.rejectPurchase('${p.id}')">✗ Reject</button>
+            ` : '—'}
+          </span>`;
+        rows.appendChild(row);
+      });
+      loadPurchaseCount();
+    }
+
+    window.approvePurchase = async (purchaseId, points) => {
+      if (!confirm(`Approve this purchase? This will add ${points} points to the user's account.\n\nMake sure you have verified the PayPal payment first!`)) return;
+      const { data, error } = await supabase.rpc('admin_review_purchase', { p_purchase_id: purchaseId, p_action: 'approve' });
+      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
+      toast(`Purchase approved! ${points} points added.`, 'success');
+      document.getElementById('purchase-row-' + purchaseId)?.remove();
+      loadPurchaseCount();
+    };
+
+    window.rejectPurchase = async (purchaseId) => {
+      const reason = prompt('Rejection reason (shown to user):');
+      if (reason === null) return;
+      const { data, error } = await supabase.rpc('admin_review_purchase', {
+        p_purchase_id: purchaseId, p_action: 'reject',
+        p_rejection_reason: reason || 'Could not verify payment'
+      });
+      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
+      toast('Purchase rejected.', '');
+      document.getElementById('purchase-row-' + purchaseId)?.remove();
+      loadPurchaseCount();
+    };
 
     window.resetRep = async (username) => {
       const { data: u } = await supabase.from('profiles').select('id').eq('username', username).single();

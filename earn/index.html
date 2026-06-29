@@ -145,6 +145,58 @@ function onComplete(pts){
   load(true);
 }
 
+window.openEarnComments = async (taskId, target) => {
+  window._earnCommentTaskId = taskId;
+  document.getElementById('ecm-title').textContent = 'Comments';
+  document.getElementById('ecm-sub').textContent = target;
+  document.getElementById('ecm-err').textContent = '';
+  document.getElementById('earn-comments-modal').classList.add('open');
+  const feed = document.getElementById('ecm-feed');
+  feed.innerHTML = '<div class="spinner" style="margin:12px auto"></div>';
+  const { data } = await supabase.from('task_comments').select('*, profiles(username,avatar_color)')
+    .eq('task_id', taskId).order('created_at', { ascending: true });
+  if (!data || !data.length) { feed.innerHTML = '<p style="color:var(--muted);font-size:0.83rem;text-align:center;padding:12px">No comments yet.</p>'; return; }
+  feed.innerHTML = data.map(cm => {
+    const ini = (cm.profiles?.username||'?')[0].toUpperCase();
+    const bg = cm.profiles?.avatar_color || 'var(--orange)';
+    return `<div style="display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="width:26px;height:26px;border-radius:50%;background:${bg};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;color:#fff;flex-shrink:0">${ini}</div>
+      <div>
+        <div style="font-size:0.78rem;color:var(--muted);margin-bottom:2px"><strong style="color:var(--text)">@${esc(cm.profiles?.username||'?')}</strong> ${cm.is_owner_note?'<span style="color:var(--orange);font-size:0.7rem">📌 Owner note</span>':''}</div>
+        <div style="font-size:0.85rem">${esc(cm.content)}</div>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.submitEarnComment = async () => {
+  const content = document.getElementById('ecm-input').value.trim();
+  const errEl = document.getElementById('ecm-err');
+  if (!content) { errEl.textContent = 'Please enter a comment.'; return; }
+  const { error } = await supabase.from('task_comments').insert({
+    task_id: window._earnCommentTaskId, user_id: profile.id, content, is_owner_note: false
+  });
+  if (error) { errEl.textContent = error.message; return; }
+  document.getElementById('ecm-input').value = '';
+  window.openEarnComments(window._earnCommentTaskId, document.getElementById('ecm-sub').textContent);
+};
+
 main();
 </script>
+<!-- Comments modal -->
+<div class="modal-overlay" id="earn-comments-modal">
+  <div class="modal" style="max-width:500px">
+    <h2 id="ecm-title">Comments</h2>
+    <p class="modal-sub" id="ecm-sub" style="word-break:break-all"></p>
+    <div id="ecm-feed" style="max-height:280px;overflow-y:auto;margin-bottom:14px"></div>
+    <div class="form-group">
+      <textarea id="ecm-input" placeholder="Ask the task owner a question…" maxlength="500" rows="2"></textarea>
+    </div>
+    <div class="error-msg" id="ecm-err"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('earn-comments-modal').classList.remove('open')">Close</button>
+      <button class="btn btn-primary" onclick="submitEarnComment()">Post</button>
+    </div>
+  </div>
+</div>
 </body></html>
