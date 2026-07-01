@@ -116,8 +116,8 @@
         </div>
       </div>
 
-      <!-- Admin only: infinite task -->
-      <div id="infinite-wrap" style="display:none;background:rgba(232,98,26,0.08);border:1px solid var(--orange);border-radius:var(--radius);padding:14px 16px;cursor:pointer" onclick="document.getElementById('infinite-check').click()">
+      <!-- Admin only: infinite task — JS reveals this only for admins -->
+      <div id="infinite-wrap" class="admin-only-field" style="background:rgba(232,98,26,0.08);border:1px solid var(--orange);border-radius:var(--radius);padding:14px 16px;cursor:pointer" onclick="document.getElementById('infinite-check').click()">
         <div style="display:flex;align-items:flex-start;gap:12px">
           <input type="checkbox" id="infinite-check" style="margin-top:3px;width:18px;height:18px;accent-color:var(--orange);flex-shrink:0" onclick="event.stopPropagation()"/>
           <div>
@@ -173,7 +173,10 @@ window.onPlatformChange = () => {
   document.getElementById('c-duration-row').style.display = 'flex';
   onUrlInput();
   updateCost();
-  if(profile.is_admin) document.getElementById('infinite-wrap').style.display='block';
+  if(profile.is_admin === true) {
+    const wrap = document.getElementById('infinite-wrap');
+    if(wrap) wrap.classList.remove('admin-only-field');
+  }
 };
 
 window.onUrlInput = () => {

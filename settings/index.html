@@ -237,6 +237,110 @@
         <span id="settings-msg" style="font-size:0.85rem"></span>
       </div>
 
+      <!-- PROFILE EDITING -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>👤 Profile</h3>
+          <p>Update your display name, bio and avatar colour</p>
+        </div>
+        <div class="settings-section-body">
+          <div class="form-group">
+            <label class="form-label">Display name</label>
+            <input type="text" id="edit-display-name" maxlength="32" placeholder="Your display name" style="width:100%;max-width:340px"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bio <span style="color:var(--muted);font-size:0.78rem">(shown on public profile)</span></label>
+            <textarea id="edit-bio" maxlength="160" rows="3" placeholder="Tell the community a bit about yourself..." style="width:100%;max-width:500px;resize:vertical;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;color:var(--text);font-family:inherit;font-size:0.9rem"></textarea>
+            <div style="font-size:0.75rem;color:var(--muted);margin-top:4px"><span id="bio-count">0</span>/160</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Avatar colour</label>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <div id="avatar-preview" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif">A</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap" id="avatar-colors">
+                <button class="color-swatch" data-color="#E8621A" style="background:#E8621A" onclick="pickAvatarColor('#E8621A')"></button>
+                <button class="color-swatch" data-color="#7c3aed" style="background:#7c3aed" onclick="pickAvatarColor('#7c3aed')"></button>
+                <button class="color-swatch" data-color="#0ea5e9" style="background:#0ea5e9" onclick="pickAvatarColor('#0ea5e9')"></button>
+                <button class="color-swatch" data-color="#22c55e" style="background:#22c55e" onclick="pickAvatarColor('#22c55e')"></button>
+                <button class="color-swatch" data-color="#ec4899" style="background:#ec4899" onclick="pickAvatarColor('#ec4899')"></button>
+                <button class="color-swatch" data-color="#f59e0b" style="background:#f59e0b" onclick="pickAvatarColor('#f59e0b')"></button>
+                <button class="color-swatch" data-color="#14b8a6" style="background:#14b8a6" onclick="pickAvatarColor('#14b8a6')"></button>
+                <button class="color-swatch" data-color="#ef4444" style="background:#ef4444" onclick="pickAvatarColor('#ef4444')"></button>
+                <button class="color-swatch" data-color="#64748b" style="background:#64748b" onclick="pickAvatarColor('#64748b')"></button>
+                <input type="color" id="avatar-custom-color" value="#E8621A" title="Custom colour" style="width:32px;height:32px;border-radius:50%;border:2px solid var(--border2);cursor:pointer;padding:0" onchange="pickAvatarColor(this.value)"/>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveProfile()">Save profile</button>
+          <span id="profile-msg" style="font-size:0.85rem;margin-left:12px"></span>
+        </div>
+      </div>
+
+      <!-- ACCESSIBILITY & BEHAVIOUR -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>♿ Accessibility &amp; Behaviour</h3>
+          <p>Motion, sound and interaction preferences</p>
+        </div>
+        <div class="settings-section-body" style="padding-top:0;padding-bottom:0">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Reduce motion</div>
+              <div class="toggle-desc">Disable animations and transitions</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-reduce-motion"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Task completion sound</div>
+              <div class="toggle-desc">Play a sound when you earn points</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-sound" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Show points animation</div>
+              <div class="toggle-desc">Animate the +pts toast when you earn</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-pts-anim" checked/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Confirm before starting tasks</div>
+              <div class="toggle-desc">Show a confirmation dialog before opening task links</div>
+            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="toggle-confirm-task"/>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATA & ACCOUNT -->
+      <div class="settings-section">
+        <div class="settings-section-header">
+          <h3>📦 Data &amp; Account</h3>
+          <p>Export or manage your account data</p>
+        </div>
+        <div class="settings-section-body">
+          <div style="display:flex;flex-direction:column;gap:10px;max-width:400px">
+            <button class="btn btn-ghost" onclick="exportPointHistory()">⬇ Export point history (CSV)</button>
+            <button class="btn btn-ghost" onclick="exportAchievements()">⬇ Export achievements (CSV)</button>
+          </div>
+          <p style="font-size:0.78rem;color:var(--muted);margin-top:12px">Exports include all your earned points, reasons, and dates.</p>
+        </div>
+      </div>
+
       <!-- DANGER ZONE -->
       <div class="settings-section" style="border-color:rgba(232,74,74,0.25)">
         <div class="settings-section-header">
@@ -312,6 +416,44 @@ async function main() {
   document.getElementById('toggle-compact').addEventListener('change', e => {
     document.body.classList.toggle('compact-mode', e.target.checked);
   });
+
+  // Profile fields
+  if (profile.display_name) document.getElementById('edit-display-name').value = profile.display_name;
+  if (profile.bio) document.getElementById('edit-bio').value = profile.bio;
+  const bioEl = document.getElementById('edit-bio');
+  const bioCount = document.getElementById('bio-count');
+  if (bioEl && bioCount) {
+    bioCount.textContent = bioEl.value.length;
+    bioEl.addEventListener('input', () => bioCount.textContent = bioEl.value.length);
+  }
+
+  // Avatar
+  const avatarColor = profile.avatar_color || '#E8621A';
+  pendingAvatarColor = avatarColor;
+  const preview = document.getElementById('avatar-preview');
+  if (preview) {
+    preview.style.background = avatarColor;
+    preview.textContent = (profile.display_name || profile.username || '?')[0].toUpperCase();
+  }
+  document.querySelectorAll('.color-swatch').forEach(s => {
+    s.classList.toggle('swatch-active', s.dataset.color === avatarColor);
+  });
+
+  // Accessibility toggles
+  const reduceMotion = localStorage.getItem('nb_reduce_motion') === '1';
+  const soundOn = localStorage.getItem('nb_sound') !== '0';
+  const ptsAnim = localStorage.getItem('nb_pts_anim') !== '0';
+  const confirmTask = localStorage.getItem('nb_confirm_task') === '1';
+  document.getElementById('toggle-reduce-motion').checked = reduceMotion;
+  document.getElementById('toggle-sound').checked = soundOn;
+  document.getElementById('toggle-pts-anim').checked = ptsAnim;
+  document.getElementById('toggle-confirm-task').checked = confirmTask;
+  if (reduceMotion) document.body.classList.add('reduce-motion');
+
+  document.getElementById('toggle-reduce-motion').addEventListener('change', e => applyReduceMotion(e.target.checked));
+  document.getElementById('toggle-sound').addEventListener('change', e => localStorage.setItem('nb_sound', e.target.checked ? '1' : '0'));
+  document.getElementById('toggle-pts-anim').addEventListener('change', e => localStorage.setItem('nb_pts_anim', e.target.checked ? '1' : '0'));
+  document.getElementById('toggle-confirm-task').addEventListener('change', e => localStorage.setItem('nb_confirm_task', e.target.checked ? '1' : ''));
 }
 
 window.pickTheme = (theme, btn) => {
@@ -396,6 +538,64 @@ window.saveSettings = async () => {
   msg.textContent = '✓ All settings saved!';
   msg.style.color = 'var(--green)';
   setTimeout(() => msg.textContent = '', 3000);
+};
+
+// ---- PROFILE EDITING ----
+let pendingAvatarColor = null;
+
+window.pickAvatarColor = (color) => {
+  pendingAvatarColor = color;
+  const preview = document.getElementById('avatar-preview');
+  if (preview) { preview.style.background = color; }
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('swatch-active', s.dataset.color === color));
+};
+
+window.saveProfile = async () => {
+  const msg = document.getElementById('profile-msg');
+  const displayName = document.getElementById('edit-display-name').value.trim();
+  const bio = document.getElementById('edit-bio').value.trim();
+  msg.textContent = 'Saving…'; msg.style.color = 'var(--muted)';
+
+  const updates = {};
+  if (displayName) updates.display_name = displayName;
+  updates.bio = bio || null;
+  if (pendingAvatarColor) updates.avatar_color = pendingAvatarColor;
+
+  const { error } = await supabase.from('profiles').update(updates).eq('id', profile.id);
+  if (error) { msg.textContent = error.message; msg.style.color = 'var(--red)'; return; }
+  msg.textContent = '✓ Profile saved!'; msg.style.color = 'var(--green)';
+  setTimeout(() => msg.textContent = '', 3000);
+};
+
+// ---- ACCESSIBILITY TOGGLES ----
+window.applyReduceMotion = (on) => {
+  document.body.classList.toggle('reduce-motion', on);
+  localStorage.setItem('nb_reduce_motion', on ? '1' : '');
+};
+
+// ---- DATA EXPORT ----
+window.exportPointHistory = async () => {
+  const { data } = await supabase.from('point_ledger')
+    .select('delta,reason,created_at').eq('user_id', profile.id)
+    .order('created_at', { ascending: false }).limit(2000);
+  if (!data?.length) { alert('No point history found.'); return; }
+  const rows = [['Date','Delta','Reason'], ...data.map(r => [r.created_at, r.delta, r.reason])];
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'nextboost-points.csv'; a.click();
+};
+
+window.exportAchievements = async () => {
+  const { data } = await supabase.from('user_achievements')
+    .select('earned_at, achievements(title,description,icon,points_reward)')
+    .eq('user_id', profile.id).order('earned_at', { ascending: false });
+  if (!data?.length) { alert('No achievements yet!'); return; }
+  const rows = [['Earned At','Icon','Title','Description','Points'], ...data.map(r => [r.earned_at, r.achievements?.icon, r.achievements?.title, r.achievements?.description, r.achievements?.points_reward])];
+  const csv = rows.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'nextboost-achievements.csv'; a.click();
 };
 
 main();

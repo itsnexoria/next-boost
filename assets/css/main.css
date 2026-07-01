@@ -462,3 +462,21 @@ h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; line-height: 1.2;
 
 /* ---- Twitter/X platform ---- */
 :root { --twitter: #1DA1F2; }
+
+/* Admin-only elements — hidden by default, JS reveals for admins */
+.admin-only-field { display: none; }
+
+/* ---- Colour swatches (settings avatar picker) ---- */
+.color-swatch {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 2px solid transparent; cursor: pointer; transition: .15s;
+  flex-shrink: 0;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.swatch-active { border-color: #fff; box-shadow: 0 0 0 2px var(--orange); }
+
+/* ---- Reduce motion ---- */
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  transition-duration: 0.001ms !important;
+}

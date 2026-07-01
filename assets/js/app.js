@@ -107,7 +107,6 @@ function renderShell(profile,currentPage){
       {href:'/achievements/',icon:'🎖️',label:'Achievements',page:'achievements'},
       {href:'/referral/',icon:'🤝',label:'Referral',page:'referral'},
       {href:'/share/',icon:'🎉',label:'Share your win',page:'share'},
-      {href:'https://discord.gg/3dknk9P5Nb',icon:'💬',label:'Community Discord',page:''},
     ];
     const L3=[
       {href:'/profile/',icon:'👤',label:'Profile',page:'profile'},
