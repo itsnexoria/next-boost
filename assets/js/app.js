@@ -75,6 +75,9 @@ export async function initApp(currentPage=''){
 // ---- RENDER SHELL ----
 function renderShell(profile,currentPage){
   const ini=(profile.display_name||profile.username||'U')[0].toUpperCase();
+  const avatarHtml = profile.avatar_url
+    ? `<img src="${profile.avatar_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0" alt="avatar"/>`
+    : `<div style="width:32px;height:32px;border-radius:50%;background:${profile.avatar_color||'#E8621A'};display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.85rem;flex-shrink:0">${ini}</div>`;
   const nav=document.getElementById('main-nav');
   if(nav){
     nav.innerHTML=`
@@ -119,7 +122,7 @@ function renderShell(profile,currentPage){
       <span class="sidebar-section-label">Explore</span>${rl(L2)}
       <span class="sidebar-section-label">Account</span>${rl(L3)}
       <a href="/profile/" class="sidebar-user" style="margin-top:auto;text-decoration:none">
-        <div style="width:32px;height:32px;border-radius:50%;background:${profile.avatar_color||'#E8621A'};display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:0.85rem;flex-shrink:0">${ini}</div>
+        ${avatarHtml}
         <div class="sidebar-user-info">
           <div class="sidebar-user-name">${esc(profile.display_name||profile.username)}</div>
           <div class="sidebar-user-pts">⚡ ${profile.points} pts · <span style="color:var(--orange)">Buy more →</span></div>

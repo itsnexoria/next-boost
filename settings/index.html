@@ -254,7 +254,20 @@
             <div style="font-size:0.75rem;color:var(--muted);margin-top:4px"><span id="bio-count">0</span>/160</div>
           </div>
           <div class="form-group">
-            <label class="form-label">Avatar colour</label>
+            <label class="form-label">Profile picture</label>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <div id="avatar-img-preview" style="width:72px;height:72px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:700;color:#fff;flex-shrink:0"></div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label class="btn btn-ghost btn-sm" style="cursor:pointer">
+                  📷 Upload photo
+                  <input type="file" id="avatar-file-input" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none" onchange="handleAvatarFile(this)"/>
+                </label>
+                <button class="btn btn-ghost btn-sm" id="remove-avatar-btn" onclick="removeAvatar()" style="display:none">🗑 Remove photo</button>
+                <div style="font-size:0.75rem;color:var(--muted)">JPG, PNG, WebP or GIF · max 2MB</div>
+                <div id="avatar-upload-progress" style="display:none;font-size:0.8rem;color:var(--orange)"></div>
+              </div>
+            </div>
+          </div>
             <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
               <div id="avatar-preview" style="width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:#fff;font-family:'Space Grotesk',sans-serif">A</div>
               <div style="display:flex;gap:8px;flex-wrap:wrap" id="avatar-colors">
@@ -417,6 +430,9 @@ async function main() {
     document.body.classList.toggle('compact-mode', e.target.checked);
   });
 
+  // Avatar upload preview
+  initAvatarPreview();
+
   // Profile fields
   if (profile.display_name) document.getElementById('edit-display-name').value = profile.display_name;
   if (profile.bio) document.getElementById('edit-bio').value = profile.bio;
@@ -427,13 +443,17 @@ async function main() {
     bioEl.addEventListener('input', () => bioCount.textContent = bioEl.value.length);
   }
 
-  // Avatar
+  // Avatar colour picker preview
   const avatarColor = profile.avatar_color || '#E8621A';
   pendingAvatarColor = avatarColor;
   const preview = document.getElementById('avatar-preview');
   if (preview) {
-    preview.style.background = avatarColor;
-    preview.textContent = (profile.display_name || profile.username || '?')[0].toUpperCase();
+    if (profile.avatar_url) {
+      preview.innerHTML = `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+    } else {
+      preview.style.background = avatarColor;
+      preview.textContent = (profile.display_name || profile.username || '?')[0].toUpperCase();
+    }
   }
   document.querySelectorAll('.color-swatch').forEach(s => {
     s.classList.toggle('swatch-active', s.dataset.color === avatarColor);
@@ -540,13 +560,90 @@ window.saveSettings = async () => {
   setTimeout(() => msg.textContent = '', 3000);
 };
 
+// ---- AVATAR UPLOAD ----
+function initAvatarPreview() {
+  const preview = document.getElementById('avatar-img-preview');
+  const removeBtn = document.getElementById('remove-avatar-btn');
+  if (!preview) return;
+  if (profile.avatar_url) {
+    preview.innerHTML = `<img src="${profile.avatar_url}" style="width:100%;height:100%;object-fit:cover"/>`;
+    if (removeBtn) removeBtn.style.display = 'block';
+  } else {
+    const ini = (profile.display_name || profile.username || '?')[0].toUpperCase();
+    preview.style.background = profile.avatar_color || '#E8621A';
+    preview.textContent = ini;
+  }
+}
+
+window.handleAvatarFile = async (input) => {
+  const file = input.files[0];
+  if (!file) return;
+  const prog = document.getElementById('avatar-upload-progress');
+  const preview = document.getElementById('avatar-img-preview');
+  const removeBtn = document.getElementById('remove-avatar-btn');
+  const msg = document.getElementById('profile-msg');
+
+  if (file.size > 2 * 1024 * 1024) {
+    msg.textContent = 'File too large — max 2MB.'; msg.style.color = 'var(--red)'; return;
+  }
+
+  prog.style.display = 'block'; prog.textContent = 'Uploading…';
+  msg.textContent = '';
+
+  // Show local preview immediately
+  const localUrl = URL.createObjectURL(file);
+  preview.innerHTML = `<img src="${localUrl}" style="width:100%;height:100%;object-fit:cover"/>`;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  const filePath = `${profile.id}/avatar.${ext}`;
+
+  const { error: upErr } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true, contentType: file.type });
+  if (upErr) { prog.textContent = 'Upload failed: ' + upErr.message; return; }
+
+  const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+  // Add cache-bust so old image doesn't linger
+  const avatarUrl = publicUrl + '?t=' + Date.now();
+
+  const { error: dbErr } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', profile.id);
+  if (dbErr) { prog.textContent = 'Save failed: ' + dbErr.message; return; }
+
+  profile.avatar_url = avatarUrl;
+  prog.style.display = 'none';
+  msg.textContent = '✓ Profile picture updated!'; msg.style.color = 'var(--green)';
+  if (removeBtn) removeBtn.style.display = 'block';
+  setTimeout(() => msg.textContent = '', 3000);
+  input.value = '';
+};
+
+window.removeAvatar = async () => {
+  if (!confirm('Remove your profile picture?')) return;
+  const msg = document.getElementById('profile-msg');
+  const removeBtn = document.getElementById('remove-avatar-btn');
+  const preview = document.getElementById('avatar-img-preview');
+
+  const { error } = await supabase.from('profiles').update({ avatar_url: null }).eq('id', profile.id);
+  if (error) { msg.textContent = error.message; msg.style.color = 'var(--red)'; return; }
+
+  profile.avatar_url = null;
+  const ini = (profile.display_name || profile.username || '?')[0].toUpperCase();
+  preview.innerHTML = '';
+  preview.style.background = profile.avatar_color || '#E8621A';
+  preview.textContent = ini;
+  if (removeBtn) removeBtn.style.display = 'none';
+  msg.textContent = '✓ Profile picture removed.'; msg.style.color = 'var(--green)';
+  setTimeout(() => msg.textContent = '', 3000);
+};
+
 // ---- PROFILE EDITING ----
 let pendingAvatarColor = null;
 
 window.pickAvatarColor = (color) => {
   pendingAvatarColor = color;
-  const preview = document.getElementById('avatar-preview');
-  if (preview) { preview.style.background = color; }
+  // Only update colour preview if no photo uploaded
+  if (!profile.avatar_url) {
+    const preview = document.getElementById('avatar-preview');
+    if (preview) { preview.style.background = color; }
+  }
   document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('swatch-active', s.dataset.color === color));
 };
 

@@ -95,12 +95,15 @@
       }
 
       const ini = (data.display_name || data.username || '?')[0].toUpperCase();
+      const avatarHtml = data.avatar_url
+        ? `<img src="${data.avatar_url}" class="pub-avatar" style="object-fit:cover" alt="avatar"/>`
+        : `<div class="pub-avatar" style="background:${data.avatar_color||'#E8621A'}">${ini}</div>`;
       const repColor = data.reputation >= 50 ? 'var(--green)' : data.reputation >= 0 ? 'var(--amber)' : 'var(--red)';
       const memberSince = new Date(data.created_at).toLocaleDateString('en-US', { year:'numeric', month:'long' });
 
       el.innerHTML = `<div class="pub-profile">
         <div class="pub-header">
-          <div class="pub-avatar" style="background:${data.avatar_color||'#E8621A'}">${ini}</div>
+          ${avatarHtml}
           <div style="flex:1;min-width:0">
             <div class="pub-name">${esc(data.display_name||data.username)}</div>
             <div class="pub-username">@${esc(data.username)} · Member since ${memberSince}</div>

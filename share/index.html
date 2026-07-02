@@ -61,7 +61,7 @@ const STATS = [
   { key: 'referral_count', label: 'Referrals',          icon: '🤝', val: p => p.referral_count || 0 },
 ];
 
-function drawCard() {
+async function drawCard() {
   if (!profile) return;
   const stat = STATS.find(s => s.key === selected) || STATS[0];
   const val = stat.val(profile);
@@ -95,17 +95,35 @@ function drawCard() {
   ctx.fillRect(0, 0, W, H);
 
   // Avatar circle
-  const avatarColor = profile.avatar_color || '#E8621A';
-  const ax = 100, ay = H/2;
+  const ax = 100, ay = H/2, ar = 56;
+  ctx.save();
   ctx.beginPath();
-  ctx.arc(ax, ay, 56, 0, Math.PI * 2);
-  ctx.fillStyle = avatarColor;
-  ctx.fill();
-  ctx.font = 'bold 44px "Space Grotesk", Arial';
-  ctx.fillStyle = '#fff';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(name[0].toUpperCase(), ax, ay + 2);
+  ctx.arc(ax, ay, ar, 0, Math.PI * 2);
+  ctx.clip();
+
+  if (profile.avatar_url) {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = profile.avatar_url; });
+      ctx.drawImage(img, ax - ar, ay - ar, ar * 2, ar * 2);
+    } catch {
+      ctx.fillStyle = profile.avatar_color || '#E8621A';
+      ctx.fillRect(ax - ar, ay - ar, ar * 2, ar * 2);
+    }
+  } else {
+    ctx.fillStyle = profile.avatar_color || '#E8621A';
+    ctx.fillRect(ax - ar, ay - ar, ar * 2, ar * 2);
+  }
+  ctx.restore();
+
+  if (!profile.avatar_url) {
+    ctx.font = 'bold 44px "Space Grotesk", Arial';
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(name[0].toUpperCase(), ax, ay + 2);
+  }
 
   // Username
   ctx.textAlign = 'left';
