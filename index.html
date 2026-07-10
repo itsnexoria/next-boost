@@ -21,7 +21,7 @@
   <meta name="twitter:description" content="Complete tasks, earn points, exchange for followers, likes, views, retweets and Discord members. Free to join."/>
   <meta name="twitter:image" content="https://boost.nexosites.xyz/assets/img/og-image.png"/>
   <meta name="robots" content="index, follow"/>
-  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="icon" href="/assets/img/favicon.svg?v=2" type="image/svg+xml"/>
   <link rel="manifest" href="/manifest.json"/>
   <meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -130,16 +130,25 @@
     </div>
   </section>
 
-  <!-- STATS -->
+  <!-- STATS (live) -->
   <section class="stats-section">
     <div class="container stats-inner">
-      <div class="stat-item"><div class="stat-num">100%</div><div class="stat-desc">Free to use</div></div>
+      <div class="stat-item"><div class="stat-num" id="live-members">—</div><div class="stat-desc">Members joined</div></div>
       <div class="stat-divider"></div>
-      <div class="stat-item"><div class="stat-num">5</div><div class="stat-desc">Platforms supported</div></div>
+      <div class="stat-item"><div class="stat-num" id="live-tasks">—</div><div class="stat-desc">Tasks completed</div></div>
       <div class="stat-divider"></div>
       <div class="stat-item"><div class="stat-num">100</div><div class="stat-desc">Free points on signup</div></div>
       <div class="stat-divider"></div>
-      <div class="stat-item"><div class="stat-num">15</div><div class="stat-desc">Daily bonus points</div></div>
+      <div class="stat-item"><div class="stat-num" id="live-platforms">6</div><div class="stat-desc">Platforms supported</div></div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF LIVE TICKER -->
+  <section style="padding:0;border-bottom:1px solid var(--border);overflow:hidden;background:var(--surface)">
+    <div id="proof-ticker" style="display:flex;align-items:center;gap:0;padding:0;white-space:nowrap;overflow:hidden;position:relative;height:38px">
+      <div id="proof-track" style="display:flex;align-items:center;gap:32px;padding:0 24px;animation:tickerScroll 30s linear infinite;will-change:transform">
+        <span style="font-size:0.78rem;color:var(--muted)">Loading live activity…</span>
+      </div>
     </div>
   </section>
 
@@ -241,9 +250,56 @@
     import { supabase, go } from '/assets/js/shared.js';
     // Auto-redirect logged in users to dashboard
     const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      go('/earn/');
+    if (session) { go('/earn/'); }
+
+    // Live stats
+    async function loadLiveStats() {
+      try {
+        const [{ count: members }, { count: tasks }] = await Promise.all([
+          supabase.from('profiles').select('*', { count: 'exact', head: true }),
+          supabase.from('completions').select('*', { count: 'exact', head: true }).eq('status','approved'),
+        ]);
+        const fmt = n => n >= 1000 ? (n/1000).toFixed(1).replace(/\.0$/,'') + 'k' : String(n||0);
+        if (members != null) document.getElementById('live-members').textContent = fmt(members);
+        if (tasks != null) document.getElementById('live-tasks').textContent = fmt(tasks);
+      } catch(e) {
+        document.getElementById('live-members').textContent = '—';
+      }
     }
+
+    // Social proof ticker
+    const PLAT_EMOJIS = { tiktok:'🎵', instagram:'📸', youtube:'▶️', discord:'💬', twitch:'🟣', twitter:'🐦', website:'🌐' };
+    const TYPE_VERBS = { follow:'followed', like:'liked', view:'watched', join:'joined', retweet:'retweeted', website:'visited' };
+    async function loadSocialProof() {
+      try {
+        const { data } = await supabase.from('completions')
+          .select('created_at, tasks(platform, type, target), profiles!completions_user_id_fkey(display_name, username)')
+          .eq('status','approved')
+          .order('created_at', { ascending: false })
+          .limit(20);
+        if (!data || !data.length) return;
+        const items = data.map(c => {
+          const plat = c.tasks?.platform || 'website';
+          const type = c.tasks?.type || 'follow';
+          const user = c.profiles?.display_name || c.profiles?.username || 'Someone';
+          const emoji = PLAT_EMOJIS[plat] || '✨';
+          const verb = TYPE_VERBS[type] || 'completed';
+          const ago = Math.max(1, Math.round((Date.now() - new Date(c.created_at)) / 60000));
+          const agoStr = ago < 60 ? `${ago}m ago` : `${Math.round(ago/60)}h ago`;
+          return `<span style="display:inline-flex;align-items:center;gap:6px;font-size:0.76rem;color:var(--muted);flex-shrink:0">${emoji} <strong style="color:var(--text)">${user}</strong> ${verb} · ${agoStr}</span>`;
+        });
+        // Double for seamless loop
+        const track = document.getElementById('proof-track');
+        const html = [...items,...items].join('<span style="color:var(--border2);margin:0 4px">·</span>');
+        track.innerHTML = html;
+        // Adjust animation speed based on content width
+        const tw = track.scrollWidth / 2;
+        track.style.animationDuration = Math.max(20, tw / 40) + 's';
+      } catch(e) { /* silent */ }
+    }
+
+    loadLiveStats();
+    loadSocialProof();
   </script>
 </body>
 </html>

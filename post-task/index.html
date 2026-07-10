@@ -9,7 +9,7 @@
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="icon" href="/assets/img/favicon.svg?v=2" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
 </head>
@@ -20,6 +20,57 @@
   <div class="page-content">
     <h1 class="page-title">Post a Task</h1>
     <p class="page-sub">Points deducted upfront. Unused slots refunded minus 7% fee on early close. Tasks expire after 7 days.</p>
+
+    <!-- GROWTH PACKAGES -->
+    <div style="max-width:580px;margin-bottom:28px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <h2 style="font-size:1.05rem;font-weight:700;margin:0 0 2px">🚀 Growth Packages</h2>
+          <p style="font-size:0.8rem;color:var(--muted);margin:0">One click to post a full campaign across multiple task types</p>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+        <!-- Starter -->
+        <div class="bundle-card" onclick="applyBundle('starter')" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:.2s;position:relative">
+          <div style="font-size:1.5rem;margin-bottom:8px">🌱</div>
+          <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">Starter Pack</div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Follow + Like<br>10 slots each · 5 pts/task</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:0.78rem;color:var(--orange);font-weight:700">100 pts total</span>
+            <span style="font-size:0.7rem;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:2px 8px;color:var(--muted)">2 tasks</span>
+          </div>
+        </div>
+        <!-- Growth -->
+        <div class="bundle-card" onclick="applyBundle('growth')" style="background:var(--surface);border:2px solid var(--orange);border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:.2s;position:relative">
+          <div style="position:absolute;top:-1px;right:12px;background:var(--orange);color:#fff;font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:0 0 6px 6px;letter-spacing:0.05em">POPULAR</div>
+          <div style="font-size:1.5rem;margin-bottom:8px">📈</div>
+          <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">Growth Bundle</div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Follow + Like + View<br>25 slots each · 8 pts/task</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:0.78rem;color:var(--orange);font-weight:700">600 pts total</span>
+            <span style="font-size:0.7rem;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:2px 8px;color:var(--muted)">3 tasks</span>
+          </div>
+        </div>
+        <!-- Viral -->
+        <div class="bundle-card" onclick="applyBundle('viral')" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:.2s;position:relative">
+          <div style="font-size:1.5rem;margin-bottom:8px">🔥</div>
+          <div style="font-weight:700;font-size:0.95rem;margin-bottom:4px">Viral Campaign</div>
+          <div style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;line-height:1.5">Follow + Like + View<br>50 slots each · 10 pts/task</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:0.78rem;color:var(--orange);font-weight:700">1,500 pts total</span>
+            <span style="font-size:0.7rem;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:2px 8px;color:var(--muted)">3 tasks</span>
+          </div>
+        </div>
+      </div>
+      <div id="bundle-status" style="margin-top:10px;font-size:0.82rem;color:var(--green);min-height:18px"></div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:12px;max-width:580px;margin-bottom:20px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-size:0.78rem;color:var(--muted);white-space:nowrap">or post a single task</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
     <div class="alert alert-info" style="max-width:580px;margin-bottom:20px;font-size:0.85rem">
       ⚠️ Max <strong>5 active tasks</strong> at a time. Account must be at least 24 hours old.
     </div>
@@ -265,6 +316,60 @@ window.postTask = async () => {
   errEl.style.color = 'var(--green)';
   errEl.textContent = `Task posted! ${data.total_cost} pts deducted. (${slots} slots x ${durLabel} timer)${boostMsg}`;
   setTimeout(() => { errEl.textContent = ''; errEl.style.color = ''; }, 5000);
+};
+
+const BUNDLES = {
+  starter: { tasks:[{type:'follow',reward:5,slots:10},{type:'like',reward:5,slots:10}], label:'Starter Pack (2 tasks)' },
+  growth:  { tasks:[{type:'follow',reward:8,slots:25},{type:'like',reward:8,slots:25},{type:'view',reward:8,slots:25}], label:'Growth Bundle (3 tasks)' },
+  viral:   { tasks:[{type:'follow',reward:10,slots:50},{type:'like',reward:10,slots:50},{type:'view',reward:10,slots:50}], label:'Viral Campaign (3 tasks)' },
+};
+
+window.applyBundle = async (bundleKey) => {
+  const bundle = BUNDLES[bundleKey];
+  if (!bundle) return;
+  const statusEl = document.getElementById('bundle-status');
+  const url = document.getElementById('p-url').value.trim();
+  const platform = document.getElementById('p-platform').value;
+  if (!url || !validateUrl(url, platform)) {
+    statusEl.style.color = 'var(--red,#f87171)';
+    statusEl.textContent = '⚠️ Please fill in a valid profile/video URL first, then click the package.';
+    document.getElementById('p-url').focus();
+    return;
+  }
+  const totalCost = bundle.tasks.reduce((sum, t) => sum + t.reward * t.slots, 0);
+  if (profile.points < totalCost) {
+    statusEl.style.color = 'var(--red,#f87171)';
+    statusEl.textContent = `Not enough points — ${bundle.label} costs ${totalCost} pts, you have ${profile.points}.`;
+    return;
+  }
+  statusEl.style.color = 'var(--muted)';
+  statusEl.textContent = `Posting ${bundle.label}…`;
+
+  let posted = 0, errors = [];
+  const supportedTypes = RULES[platform]?.types || [];
+  for (const t of bundle.tasks) {
+    const taskType = supportedTypes.includes(t.type) ? t.type : supportedTypes[0];
+    if (!taskType) continue;
+    const { data, error } = await supabase.rpc('post_task', {
+      p_platform: platform, p_type: taskType, p_target: url,
+      p_description: null, p_points_reward: t.reward,
+      p_max_completions: t.slots, p_required_duration_ms: 10000,
+      p_is_infinite: false
+    });
+    if (error || data?.error) errors.push(data?.error || error.message);
+    else posted++;
+  }
+  const { data: p } = await supabase.from('profiles').select('points').eq('id', profile.id).single();
+  if (p) { profile.points = p.points; updateNavPoints(p.points); updateCost(); }
+
+  if (errors.length) {
+    statusEl.style.color = 'var(--red,#f87171)';
+    statusEl.textContent = `Posted ${posted} tasks. Errors: ${errors.join('; ')}`;
+  } else {
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = `✅ ${bundle.label} posted! ${posted} tasks live · ${totalCost} pts spent.`;
+    setTimeout(() => { statusEl.textContent = ''; }, 6000);
+  }
 };
 
 async function main() {

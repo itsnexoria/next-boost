@@ -9,7 +9,7 @@
   <link rel="manifest" href="/manifest.json"/><meta name="theme-color" content="#E8621A"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <link rel="apple-touch-icon" href="/assets/img/logo.png"/>
-  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml"/>
+  <link rel="icon" href="/assets/img/favicon.svg?v=2" type="image/svg+xml"/>
   <link rel="stylesheet" href="/assets/css/main.css"/>
   <link rel="stylesheet" href="/assets/css/app.css"/>
 </head>
@@ -104,13 +104,13 @@ async function checkBonusEvent(){
 async function load(reset=true){
   if(reset){offset=0;allLoaded=[];document.getElementById('earn-feed').innerHTML='<div class="spinner"></div>';}
   try{
-    const {data:tasks,error}=await supabase.from('tasks').select('*, owner:profiles!owner_id(username,display_name)')
+    const {data:tasks,error}=await supabase.from('tasks').select('*, owner:profiles!owner_id(username,display_name,trust_score,is_verified)')
       .eq('is_active',true).neq('owner_id',profile.id)
       .order('is_boosted',{ascending:false}).order('created_at',{ascending:false})
       .range(offset,offset+PAGE-1);
     if(error) throw error;
     // Flatten owner fields
-    (tasks||[]).forEach(t=>{t.owner_username=t.owner?.username;t.owner_display_name=t.owner?.display_name;});
+    (tasks||[]).forEach(t=>{t.owner_username=t.owner?.username;t.owner_display_name=t.owner?.display_name;t.owner_trust_score=t.owner?.trust_score||0;t.owner_is_verified=t.owner?.is_verified||false;});
     if(reset){
       const {data:myC}=await supabase.from('completions').select('task_id,status').eq('user_id',profile.id);
       myStatus=Object.fromEntries((myC||[]).map(c=>[c.task_id,c.status]));
@@ -148,11 +148,17 @@ function render(reset=true){
     const card=document.createElement('div');
     card.className='task-card card-animate'; card.dataset.id=t.id;
     card.style.setProperty('--delay',`${i*0.04}s`);
+    const trustScore = t.owner_trust_score || 0;
+    const trustColor = trustScore >= 80 ? '#4ade80' : trustScore >= 50 ? '#f59e0b' : '#94a3b8';
+    const trustLabel = trustScore >= 80 ? 'High trust' : trustScore >= 50 ? 'Good' : trustScore > 0 ? 'New' : '';
+    const trustHtml = trustScore > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;font-size:0.7rem;color:${trustColor};background:${trustColor}1a;border:1px solid ${trustColor}33;border-radius:999px;padding:1px 6px;font-weight:600" title="Creator Trust Score">🛡 ${trustScore} ${trustLabel}</span>` : '';
+    const verifiedHtml = t.owner_is_verified ? `<span style="font-size:0.72rem;color:#60a5fa;background:#60a5fa1a;border:1px solid #60a5fa33;border-radius:999px;padding:1px 6px;font-weight:600" title="Verified Creator">✓ Verified</span>` : '';
     card.innerHTML=`
       <div class="task-plat-icon ${PC[t.platform]||'plat-website'}"></div>
       <div class="task-info">
         <h4>${esc(prettyTarget(t.target, t.platform))}${t.is_boosted?' <span class="boost-badge">⚡ Boosted</span>':''}</h4>
-        <p>${esc(TL[t.type]||t.type)} · by <span style="color:var(--text)">${esc(t.owner_display_name||t.owner_username||'Unknown')}</span> · <span class="expiry-label">${exp}d left</span></p>
+        <p>${esc(TL[t.type]||t.type)} · by <span style="color:var(--text)">${esc(t.owner_display_name||t.owner_username||'Unknown')}</span>${verifiedHtml?` ${verifiedHtml}`:''} · <span class="expiry-label">${exp}d left</span></p>
+        ${trustHtml ? `<div style="margin-top:5px">${trustHtml}</div>` : ''}
       </div>
       <div class="task-actions">
         <span class="type-badge type-${t.type}">${TL[t.type]}</span>

@@ -186,3 +186,18 @@
 .comp-col { text-align: center; }
 .comp-us { color: #4ade80; font-weight: 600; }
 .comp-them { color: var(--muted); }
+
+/* ---- Live proof ticker ---- */
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+#proof-track { display: flex; align-items: center; gap: 32px; padding: 0 24px; }
+#proof-ticker:hover #proof-track { animation-play-state: paused; }
+
+/* ---- Bundle cards ---- */
+.bundle-card:hover {
+  border-color: var(--orange) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(232,98,26,0.12);
+}
