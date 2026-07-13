@@ -352,10 +352,10 @@
 }
 
 /* ---- WEBSITE PLATFORM ---- */
-.plat-website { background: rgba(100,116,139,0.15); }
+.plat-website { background-color: rgba(100,116,139,0.15); }
 
 /* ---- TWITCH PLATFORM ---- */
-.plat-twitch { background: rgba(145,70,255,0.15); }
+.plat-twitch { background-color: rgba(145,70,255,0.15); }
 
 /* ---- FONT CHOICES ---- */
 body.font-space   { font-family: 'Space Grotesk', sans-serif; }

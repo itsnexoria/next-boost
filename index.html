@@ -250,6 +250,7 @@
   </footer>
 
   <script type="module">
+    import '/assets/js/app.js'; // powers scroll-reveal animations, PWA install prompt, etc.
     import { supabase, go } from '/assets/js/shared.js';
     // Auto-redirect logged in users to dashboard
     const { data: { session } } = await supabase.auth.getSession();
