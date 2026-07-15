@@ -182,7 +182,7 @@
 </div>
 
 <script type="module">
-import { supabase, esc, getRank, RANKS, SUB_TIERS } from '/assets/js/shared.js';
+import { supabase, esc, getRank, RANKS } from '/assets/js/shared.js';
 import { initApp, updateNavPoints } from '/assets/js/app.js';
 import { iconSVG } from '/src/icons.js';
 
@@ -223,7 +223,7 @@ function renderProfile(email) {
           ${profile.bio ? `<div class="profile-bio">${esc(profile.bio)}</div>` : ''}
           <div class="profile-badges">
             <span class="profile-badge" style="color:${rank.color};border-color:${rank.color}" title="${rank.name} rank — based on points, tasks completed, and trust score">${iconSVG(rank.icon,13)} ${rank.name}</span>
-            ${(profile.subscription_tier && profile.subscription_expires_at && new Date(profile.subscription_expires_at) > new Date()) ? (() => { const st = SUB_TIERS[profile.subscription_tier]; return `<span class="profile-badge" style="color:${st.color};border-color:${st.color};background:${st.color}18" title="${st.name} subscriber — active until ${new Date(profile.subscription_expires_at).toLocaleDateString()}">${iconSVG(st.icon,13)} ${st.name}</span>`; })() : ''}
+
             ${profile.is_admin ? `<span class="profile-badge" style="color:var(--orange);border-color:var(--orange)">${iconSVG('shield-check',12)} Admin</span>` : ''}
             ${profile.is_verified ? `<span class="profile-badge" style="color:#60a5fa;border-color:#60a5fa;background:rgba(96,165,250,0.1)" title="Verified Creator">${iconSVG('circle-check',12)} Verified Creator</span>` : ''}
             ${(profile.trust_score||0) > 0 ? `<span class="profile-badge" style="color:${(profile.trust_score||0)>=80?'#4ade80':(profile.trust_score||0)>=50?'#f59e0b':'#94a3b8'};border-color:currentColor" title="Creator Trust Score — based on activity, completions & streak">${iconSVG('shield-check',12)} Trust ${profile.trust_score}/100</span>` : ''}

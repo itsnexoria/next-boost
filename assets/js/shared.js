@@ -125,13 +125,6 @@ export const SOCIAL_PLATFORMS = [
   { key: 'twitch',    label: 'Twitch',      placeholder: 'https://twitch.tv/yourhandle' },
 ];
 
-// ---- SUBSCRIPTION TIERS ---- (keep in sync with subscription_tier_info SQL function)
-export const SUB_TIERS = {
-  pro:   { key: 'pro',   name: 'Pro',   icon: 'zap',   color: '#60a5fa', usd: 4.99,  slots: 10, feeDiscount: 0.50 },
-  vip:   { key: 'vip',   name: 'VIP',   icon: 'gem',   color: '#a78bfa', usd: 9.99,  slots: 25, feeDiscount: 0.75 },
-  elite: { key: 'elite', name: 'Elite', icon: 'crown', color: '#f59e0b', usd: 19.99, slots: 60, feeDiscount: 1.00 },
-};
-
 // ---- RANK SYSTEM ----
 // Tiers are based on a composite score (points + tasks completed + trust), not raw points alone —
 // grinding out tasks and staying trustworthy both matter, not just accumulating points.

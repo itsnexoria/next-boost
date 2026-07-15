@@ -139,13 +139,7 @@
           <h1 class="admin-title">Purchases</h1>
           <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px">Review PayPal purchase requests. Verify payment in your PayPal account before approving.</p>
 
-          <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--surface2);border-radius:var(--radius);padding:4px;width:fit-content">
-            <button class="btn btn-primary btn-sm purch-subtab" onclick="switchPurchTab('points',this)" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="credit-card" data-size="13"></i> Points & slots</button>
-            <button class="btn btn-ghost btn-sm purch-subtab" onclick="switchPurchTab('subs',this)" style="border-radius:calc(var(--radius) - 4px)"><i data-lucide="sparkles" data-size="13"></i> Subscriptions <span class="reports-count" id="sub-purchase-count" style="display:none">0</span></button>
-          </div>
-
           <div id="purchases-wrap"><div class="spinner"></div></div>
-          <div id="sub-purchases-wrap" style="display:none"><div class="spinner"></div></div>
         </div>
 
         <!-- BROADCAST -->
@@ -834,73 +828,9 @@
     async function loadPurchaseCount() {
       const { data } = await supabase.rpc('admin_get_purchases', { p_limit: 100, p_offset: 0 });
       const pending = (data || []).filter(p => p.status === 'pending').length;
-      const { data: subData } = await supabase.rpc('admin_get_subscription_purchases', { p_status: 'pending' });
-      const subPending = (subData || []).length;
       const badge = document.getElementById('purchase-count');
-      if (badge) { badge.textContent = pending + subPending; badge.style.display = (pending+subPending) > 0 ? 'inline-flex' : 'none'; }
-      const subBadge = document.getElementById('sub-purchase-count');
-      if (subBadge) { subBadge.textContent = subPending; subBadge.style.display = subPending > 0 ? 'inline-flex' : 'none'; }
+      if (badge) { badge.textContent = pending; badge.style.display = pending > 0 ? 'inline-flex' : 'none'; }
     }
-
-    window.switchPurchTab = (which, btn) => {
-      document.querySelectorAll('.purch-subtab').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-ghost'); });
-      btn.classList.remove('btn-ghost'); btn.classList.add('btn-primary');
-      document.getElementById('purchases-wrap').style.display = which === 'points' ? 'block' : 'none';
-      document.getElementById('sub-purchases-wrap').style.display = which === 'subs' ? 'block' : 'none';
-      if (which === 'subs') loadSubPurchases();
-    };
-
-    async function loadSubPurchases() {
-      const wrap = document.getElementById('sub-purchases-wrap');
-      wrap.innerHTML = '<div class="spinner"></div>';
-      const { data, error } = await supabase.rpc('admin_get_subscription_purchases', { p_status: null });
-      if (error || !data || !data.length) {
-        wrap.innerHTML = `<div class="empty-state"><div class="empty-icon">${iconSVG('sparkles',28)}</div><p>No subscription requests yet.</p></div>`;
-        return;
-      }
-      const statusColors = { pending: 'var(--amber)', approved: 'var(--green)', rejected: 'var(--red)' };
-      wrap.innerHTML = `
-        <div class="admin-table">
-          <div class="admin-table-head" style="grid-template-columns:1.5fr 1fr 0.8fr 1fr 1fr 1.5fr">
-            <span>User</span><span>Tier</span><span>Amount</span><span>PayPal Ref</span><span>Status</span><span>Actions</span>
-          </div>
-          <div>${data.map(p => `
-            <div class="admin-table-row" id="sub-purchase-row-${p.id}" style="grid-template-columns:1.5fr 1fr 0.8fr 1fr 1fr 1.5fr">
-              <span><div class="user-name">${esc(p.username)}</div></span>
-              <span style="text-transform:capitalize">${esc(p.tier)}</span>
-              <span style="font-weight:700;color:var(--green)">$${parseFloat(p.usd_amount).toFixed(2)}</span>
-              <span style="font-size:0.8rem;word-break:break-all">${esc(p.paypal_ref||'')}</span>
-              <span style="color:${statusColors[p.status]};font-weight:700;text-transform:capitalize">${p.status}</span>
-              <span class="action-btns">
-                ${p.status === 'pending' ? `
-                  <button class="btn btn-sm" style="background:rgba(61,186,111,0.15);color:var(--green)" onclick="window.approveSubPurchase('${p.id}')">${iconSVG('check',12)} Approve</button>
-                  <button class="btn btn-danger btn-sm" onclick="window.rejectSubPurchase('${p.id}')">${iconSVG('x',12)} Reject</button>
-                ` : '—'}
-              </span>
-            </div>`).join('')}</div>
-        </div>`;
-    }
-
-    window.approveSubPurchase = async (id) => {
-      if (!confirm('Approve this subscription? Make sure you have verified the PayPal payment first!')) return;
-      const { data, error } = await supabase.rpc('admin_review_subscription_purchase', { p_id: id, p_approve: true });
-      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
-      toast('Subscription approved!', 'success');
-      document.getElementById('sub-purchase-row-' + id)?.remove();
-      loadPurchaseCount();
-    };
-
-    window.rejectSubPurchase = async (id) => {
-      const reason = prompt('Rejection reason (shown to user):');
-      if (reason === null) return;
-      const { data, error } = await supabase.rpc('admin_review_subscription_purchase', {
-        p_id: id, p_approve: false, p_reason: reason || 'Could not verify payment'
-      });
-      if (error || data?.error) { toast(data?.error || error.message, 'error'); return; }
-      toast('Subscription request rejected.', '');
-      document.getElementById('sub-purchase-row-' + id)?.remove();
-      loadPurchaseCount();
-    };
 
     async function loadPurchases() {
       const wrap = document.getElementById('purchases-wrap');
